@@ -17,9 +17,12 @@ filename = "static/test.png"
 #print(pytesseract.image_to_string(img))  # print identified text
 ALLOWED_CHARACTERS = ['.', '\'']
 
-def get_boxes(filename):
-    img = cv2.imread(filename)
+def get_boxes(filestr):
+    file_bytes = np.fromstring(filestr, np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
     h, w, _ = img.shape
+
+    #print(pytesseract.image_to_string(img))
 
     boxes = pytesseract.image_to_boxes(img)
     boxes = [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARACTERS]
