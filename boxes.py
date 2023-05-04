@@ -1,11 +1,36 @@
 import cv2
 import pytesseract
-import matplotlib.pyplot as plt
-from PIL import Image
 import numpy as np
 
 filename = "static/test.png"
 
+
+ALLOWED_CHARACTERS = ['.', '\'']
+
+def get_boxes(filestr):
+    """Gets list of detected letters and their coordinates in the image (boxes)
+    one box: ['ltr', int:top_left_x, int:top_left_y, int:bottom_right_x, int:bottom_right_y]
+    """
+
+    file_bytes = np.fromstring(filestr, np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
+    h, w, _ = img.shape
+
+    boxes = clean_boxes(pytesseract.image_to_boxes(img))
+    dim = [h,w]
+
+    return boxes,dim
+
+def clean_boxes(boxes):
+    """
+    Removes all non ALLOWED_CHARACTERS and non letters from list of detected letters
+    """
+
+    return [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARACTERS]
+
+
+#KEEPING THIS JUST IN CASE FOR NOW
+#----------------------------------
 # read the image and get the dimensions
 # img = cv2.imread(filename)
 # h, w, _ = img.shape  # assumes color image
@@ -15,20 +40,6 @@ filename = "static/test.png"
 # breakpoint
 
 #print(pytesseract.image_to_string(img))  # print identified text
-ALLOWED_CHARACTERS = ['.', '\'']
-
-def get_boxes(filestr):
-    file_bytes = np.fromstring(filestr, np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
-    h, w, _ = img.shape
-
-    #print(pytesseract.image_to_string(img))
-
-    boxes = pytesseract.image_to_boxes(img)
-    boxes = [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARACTERS]
-
-    return boxes
-
 
 # height = 500
 # weight = 500

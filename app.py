@@ -4,7 +4,6 @@ import os
 from flask import Flask, request, request, jsonify, render_template
 from flask_debugtoolbar import DebugToolbarExtension
 from models import connect_db, db
-from PIL import Image
 from boxes import get_boxes
 
 app = Flask(__name__)
@@ -20,12 +19,18 @@ connect_db(app)
 
 @app.get('/')
 def home():
+    """renders homepage"""
+    
     return render_template('base.html')
 
 @app.post('/image')
-def boxes():
-    filestr = request.files['file'].read()
-    #breakpoint()
-    boxes = get_boxes(filestr)
+def send_boxes():
+    """
+        accepts multipart/form data image in request
+        sends list of boxes and image dimensions in response
+    """
 
-    return jsonify({'msg': 'success', 'boxes': boxes})
+    filestr = request.files['file'].read()
+    boxes, dim = get_boxes(filestr)
+
+    return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim})
