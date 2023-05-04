@@ -5,7 +5,7 @@ import numpy as np
 filename = "static/test.png"
 
 
-ALLOWED_CHARACTERS = ['.', '\'']
+ALLOWED_CHARS = ['.', '\'', '&']
 
 def get_boxes(filestr):
     """Gets list of detected letters and their coordinates in the image (boxes)
@@ -26,7 +26,7 @@ def clean_boxes(boxes):
     Removes all non ALLOWED_CHARACTERS and non letters from list of detected letters
     """
 
-    return [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARACTERS]
+    return [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARS]
 
 
 #KEEPING THIS JUST IN CASE FOR NOW
