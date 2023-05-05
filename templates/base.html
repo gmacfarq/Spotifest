@@ -9,8 +9,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
     />
+    <link rel="stylesheet" href="../static/app.css">
   </head>
   <body>
+
     <div class="container" style="max-width: 600px">
       <h3 class="mb-3">Axios File Upload</h3>
 
@@ -27,9 +29,16 @@
           </button>
         </div>
       </div>
-      <div id="image-wrapper" style="position: relative; z-index: 1;">
+      <div id="image-wrapper" style="position: relative; z-index: 2;">
+        <div id="canvas"></div>
+        <div id="rectangle" style="position: fixed; z-index: 5;"></div>
       </div>
 
+    </div>
+    <div>
+      <ul>
+        <!--Artist names appended to list here-->
+      </ul>
     </div>
       <script src="https://unpkg.com/jquery"></script>
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
