@@ -9,6 +9,8 @@ const $inputFileLabel = $('#input-file-label');
 const $imageWrapper = $('#image-wrapper');
 
 
+
+
 /**
  * Handles changes in file input
  * Displays the selected file name in the input label
@@ -23,20 +25,17 @@ $fileInput.on("change", showFileName);
 
 /**
  * Appends the image in 'file' to the DOM
- * @param {*} file
+ * @param {file} file
  */
 function displayImage(file) {
   var reader = new FileReader();
 
   reader.onload = function () {
-    $imageWrapper.html("");
+    //$imageWrapper.html("");
 
     $imageWrapper.append(
       $('<img>')
-        .css("height", "800px")
-        .css("width", "auto")
-        .css("position", "absolute")
-        .css("z-index", 2)
+        .attr("class", "image")
         .attr('src', reader.result)
     );
   };
@@ -89,14 +88,11 @@ function displayBoxes(box_data) {
     $imageWrapper.append(
       $('<div>').html(
         box[0]
-      ).css("position", "absolute")
+      ).attr("class", "content")
         .css("bottom", `${box[2] * ratio}px`)
         .css("left", `${box[1] * ratio}px`)
-        .css("z-index", "3")
-        .css("display", "inline-block")
         .css('height', `${(box[4] - box[2]) * (ratio)}px`)
         .css('width', `${(box[3] - box[1]) * (ratio)}px`)
-        .css('border-style', 'solid')
     ).css('height', height).css('width', width);
   }
 }
@@ -122,6 +118,8 @@ async function submitImage(evt) {
     let response = await updloadImage(file);
     console.log(response.data);
     displayBoxes(response.data);
+    allowDrawing();
+
 
   } else {
     alert("bad file");
@@ -129,3 +127,118 @@ async function submitImage(evt) {
 }
 
 $submitBtn.on("click", submitImage);
+
+
+function allowDrawing() {
+  const $contents = $('.content');
+  const $canvas = $('#canvas');
+  const $rectangle = $('#rectangle');
+
+  let isDrawing = false;
+  let startX, startY;
+
+  $(document).on('mousedown', function (e) {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDrawing = true;
+    $rectangle.css({
+      left: `${startX}px`,
+      top: `${startY}px`,
+      width: 0,
+      height: 0
+    });
+    $canvas.css('display', 'block');
+  });
+
+  $(document).on('mouseup', function (e) {
+    if (!isDrawing) return;
+
+    //offset = $('img').offset()
+
+    const width = e.clientX - startX;
+    const height = e.clientY - startY;
+    $rectangle.css({
+      width: `${width}px`,
+      height: `${height}px`
+    });
+
+    const rect = $rectangle[0].getBoundingClientRect();
+    const left = rect.left;
+    const top = rect.top;
+    const right = left + rect.width;
+    const bottom = top + rect.height;
+
+    $contents.each(function () {
+      const $this = $(this);
+      const thisRect = this.getBoundingClientRect();
+      const thisLeft = thisRect.left;
+      const thisTop = thisRect.top;
+      const thisRight = thisLeft + thisRect.width;
+      const thisBottom = thisTop + thisRect.height;
+      const isIntersecting = !(right < thisLeft || left > thisRight || bottom < thisTop || top > thisBottom);
+
+      if (isIntersecting) {
+
+        $rectangle.append($this.clone());
+        $this.remove();
+      }
+
+
+
+    });
+    let $wordDiv = $rectangle.clone()
+      .attr("class", "artistDiv")
+      .attr('id', null);
+
+    $rectangle.html("");
+
+    $imageWrapper.append($wordDiv);
+    words.push($wordDiv);
+  });
+}
+
+$(document).keydown(function (e) {
+  // check if the pressed key is the spacebar
+  if (e.keyCode == 32) {
+    // do something
+    console.log('Spacebar pressed!');
+    displayArtist();
+    //combineDivs(artistName);
+  }
+});
+
+let words = [];
+
+function displayArtist() {
+  let artistName = generateArtistName();
+  $('ul').append(
+    $('<li>').html(artistName)
+  );
+
+  words = [];
+  return artistName
+}
+
+function generateArtistName() {
+  let name = "";
+  console.log(words);
+  for (let $wordDiv of words) {
+    console.log($wordDiv);
+    name = name + " ";
+    for (let $contentDiv of $wordDiv.children()) {
+      name = name + $contentDiv["innerText"];
+    }
+  }
+  console.log(name);
+  return name;
+}
+
+/*combine divs into one div that has largest bounds
+*/
+function combineDivs() {
+
+}
+//then add eventlisteners to all completed divs
+/*
+  completed div looks like <div class="artist-div">"artists name"<div>
+*/
