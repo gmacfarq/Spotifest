@@ -7,8 +7,8 @@
 
 .content {
   position: absolute;
-  padding: 10px;
-  font-size: 14px;
+  padding: 0px;
+  font-size: 5px;
   border: 1px solid black;
   z-index: 3;
 }

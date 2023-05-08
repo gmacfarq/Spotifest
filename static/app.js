@@ -128,7 +128,9 @@ async function submitImage(evt) {
 
 $submitBtn.on("click", submitImage);
 
-
+/**
+ * Allow user to draw boxes on screen to create artist listing
+ */
 function allowDrawing() {
   const $contents = $('.content');
   const $canvas = $('#canvas');
@@ -178,59 +180,150 @@ function allowDrawing() {
       const isIntersecting = !(right < thisLeft || left > thisRight || bottom < thisTop || top > thisBottom);
 
       if (isIntersecting) {
-
         $rectangle.append($this.clone());
         $this.remove();
       }
 
-
-
     });
-    let $wordDiv = $rectangle.clone()
-      .attr("class", "artistDiv")
-      .attr('id', null);
 
-    $rectangle.html("");
+    addWord($rectangle);
 
-    $imageWrapper.append($wordDiv);
-    words.push($wordDiv);
   });
 }
+
+let words = [];
+
+/**
+ * Add div to array of words
+ * @param {*} $rectangle
+ */
+function addWord($rectangle) {
+  let $wordDiv = $rectangle.clone()
+    .attr("class", "artistDiv")
+    .css("position", "absolute")
+    .attr('id', null);
+
+  $rectangle.html("");
+  words.push($wordDiv);
+}
+
+// filled with list of artists found on page
+let artists = [];
+
+/**
+ * Class for individual Artist
+ */
+class Artist {
+  constructor(name, festival, divs) {
+    this.name = name;//name of artist
+    this.festival = festival;//current festival
+    this.divs = divs; //all content divs
+  }
+
+  //displays the Artist Name in the DOM
+  displayArtistName() {
+    if (this.name) {
+      $('ul').append(
+        $('<li>').html(this.name)
+      );
+    }
+  }
+
+  //TODO: Handle vertical letter orientation
+  displayBoundingBox() {
+
+    const firstLetterDiv = this.divs[0];
+    const lastLetterDiv = this.divs[this.divs.length - 1];
+    let bottom = getMinPixels(this.divs.map(div => div.style['bottom']));
+    let left = firstLetterDiv.style['left'];
+    let width = parseFloat(lastLetterDiv.style['left']) +
+                parseFloat(lastLetterDiv.style['width']) -
+                parseFloat(left);
+    let highestPoint = getMaxPixels(this.divs.map(div => parseFloat(div.style['bottom']) + parseFloat(div.style['height'])));
+    let height = highestPoint - parseFloat(bottom);
+
+    $imageWrapper.append($('<div>').html(
+      this.name
+    ).attr("class", "content")
+      .css("bottom", `${bottom}`)
+      .css("left", `${left}`)
+      .css('height', `${height}px`)
+      .css('width', `${width}px`)
+    );
+
+  }
+
+  /**
+   * Generates an instance of the Artist object from the global list of words
+   * @returns {Artist}
+   */
+  static generateArtistFromWords() {
+    let name = "";
+    let letters = [];
+    for (let $wordDiv of words) {
+
+      if (!$wordDiv.children().length) {
+        continue;
+      }
+
+      name = name + " ";
+
+      for (let $letterDiv of $wordDiv.children()) {
+        name = name + $letterDiv["innerText"];
+        letters.push($letterDiv);
+      }
+    }
+
+    if (!name || name === " ") {
+      alert("No Artist Created");
+      return;
+    }
+
+    return new Artist(name.trim(), "coachella", letters);
+  }
+}
+
+
+
 
 $(document).keydown(function (e) {
   // check if the pressed key is the spacebar
   if (e.keyCode == 32) {
     // do something
     console.log('Spacebar pressed!');
-    displayArtist();
+    let artist = Artist.generateArtistFromWords();
+    words = [];
+    if (artist) {
+      artist.displayArtistName();
+      artist.displayBoundingBox();
+      artists.push(artist);
+    }
     //combineDivs(artistName);
   }
 });
 
-let words = [];
-
-function displayArtist() {
-  let artistName = generateArtistName();
-  $('ul').append(
-    $('<li>').html(artistName)
-  );
-
-  words = [];
-  return artistName
-}
-
-function generateArtistName() {
-  let name = "";
-  console.log(words);
-  for (let $wordDiv of words) {
-    console.log($wordDiv);
-    name = name + " ";
-    for (let $contentDiv of $wordDiv.children()) {
-      name = name + $contentDiv["innerText"];
+function getMaxPixels(strs) {
+  let max = 0;
+  let mpx = "";
+  for (let str of strs) {
+    if (parseFloat(str) > max) {
+      max = parseFloat(str);
+      mpx = str;
     }
   }
-  console.log(name);
-  return name;
+  return mpx;
+}
+
+function getMinPixels(strs) {
+  let min = Infinity;
+  let mpx = "";
+  for (let str of strs) {
+    if (parseFloat(str) < min) {
+      min = parseFloat(str);
+      mpx = str;
+    }
+  }
+  return mpx;
 }
 
 /*combine divs into one div that has largest bounds
