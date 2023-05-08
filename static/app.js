@@ -7,6 +7,7 @@ const $submitBtn = $('#submit-btn');
 const $fileInput = $('#input-file');
 const $inputFileLabel = $('#input-file-label');
 const $imageWrapper = $('#image-wrapper');
+let imgRatio;
 
 
 
@@ -214,10 +215,11 @@ let artists = [];
  * Class for individual Artist
  */
 class Artist {
-  constructor(name, festival, divs) {
+  constructor(name, festival, letterDivs) {
     this.name = name;//name of artist
     this.festival = festival;//current festival
-    this.divs = divs; //all content divs
+    this.letterDivs = letterDivs; //all content letterDivs
+    this.fullDivData = null;
   }
 
   //displays the Artist Name in the DOM
@@ -229,28 +231,29 @@ class Artist {
     }
   }
 
-  //TODO: Handle vertical letter orientation
+  //TODO: Clean this shit up
   displayBoundingBox() {
 
-    const firstLetterDiv = this.divs[0];
-    const lastLetterDiv = this.divs[this.divs.length - 1];
-    let bottom = getMinPixels(this.divs.map(div => div.style['bottom']));
+    const firstLetterDiv = this.letterDivs[0];
+    const lastLetterDiv = this.letterDivs[this.letterDivs.length - 1];
+    let bottom = getMinPixels(this.letterDivs.map(div => div.style['bottom']));
     let left = firstLetterDiv.style['left'];
     let width = parseFloat(lastLetterDiv.style['left']) +
-                parseFloat(lastLetterDiv.style['width']) -
-                parseFloat(left);
-    let highestPoint = getMaxPixels(this.divs.map(div => parseFloat(div.style['bottom']) + parseFloat(div.style['height'])));
+      parseFloat(lastLetterDiv.style['width']) -
+      parseFloat(left);
+    let highestPoint = getMaxPixels(this.letterDivs.map(div => parseFloat(div.style['bottom']) + parseFloat(div.style['height'])));
     let height = highestPoint - parseFloat(bottom);
 
-    $imageWrapper.append($('<div>').html(
-      this.name
-    ).attr("class", "content")
+    let $fullArtistDiv = $('<div>')
+      .attr("class", "content")
       .css("bottom", `${bottom}`)
       .css("left", `${left}`)
       .css('height', `${height}px`)
-      .css('width', `${width}px`)
-    );
+      .css('width', `${width}px`);
 
+    $imageWrapper.append($fullArtistDiv);
+
+    this.fullDivData = $fullArtistDiv;
   }
 
   /**
@@ -294,11 +297,11 @@ $(document).keydown(function (e) {
     let artist = Artist.generateArtistFromWords();
     words = [];
     if (artist) {
-      artist.displayArtistName();
+      //artist.displayArtistName();
       artist.displayBoundingBox();
       artists.push(artist);
     }
-    //combineDivs(artistName);
+    //combineletterDivs(artistName);
   }
 });
 
@@ -326,7 +329,7 @@ function getMinPixels(strs) {
   return mpx;
 }
 
-/*combine divs into one div that has largest bounds
+/*combine letterDivs into one div that has largest bounds
 */
 function combineDivs() {
 
