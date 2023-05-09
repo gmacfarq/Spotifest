@@ -20,7 +20,7 @@ connect_db(app)
 @app.get('/')
 def home():
     """renders homepage"""
-    
+
     return render_template('base.html')
 
 @app.post('/image')
@@ -30,7 +30,10 @@ def send_boxes():
         sends list of boxes and image dimensions in response
     """
 
-    filestr = request.files['file'].read()
-    boxes, dim = get_boxes(filestr)
+    file = request.files['file'].read()
+
+    #filename = str(request.files["file"]).split()[1][1:-1]
+    boxes, dim = get_boxes(file)
+    #file.save(f'static/images/{filename}')
 
     return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim})
