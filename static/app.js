@@ -7,7 +7,7 @@ const $submitBtn = $('#submit-btn');
 const $fileInput = $('#input-file');
 const $inputFileLabel = $('#input-file-label');
 const $imageWrapper = $('#image-wrapper');
-let imgRatio;
+const $artistList = $('#artist-list');
 
 
 
@@ -140,7 +140,7 @@ function allowDrawing() {
   let isDrawing = false;
   let startX, startY;
 
-  $(document).on('mousedown', function (e) {
+  $imageWrapper.on('mousedown', function (e) {
     startX = e.clientX;
     startY = e.clientY;
     isDrawing = true;
@@ -153,7 +153,7 @@ function allowDrawing() {
     $canvas.css('display', 'block');
   });
 
-  $(document).on('mouseup', function (e) {
+  $imageWrapper.on('mouseup', function (e) {
     if (!isDrawing) return;
 
     //offset = $('img').offset()
@@ -193,6 +193,7 @@ function allowDrawing() {
 }
 
 let words = [];
+let editing = false;
 
 /**
  * Add div to array of words
@@ -215,20 +216,48 @@ let artists = [];
  * Class for individual Artist
  */
 class Artist {
-  constructor(name, festival, letterDivs) {
+  constructor(name, letterDivs) {
     this.name = name;//name of artist
-    this.festival = festival;//current festival
     this.letterDivs = letterDivs; //all content letterDivs
     this.fullDivData = null;
   }
 
-  //displays the Artist Name in the DOM
-  displayArtistName() {
-    if (this.name) {
-      $('ul').append(
-        $('<li>').html(this.name)
-      );
+  //get artist instance
+  static getArtist(name) {
+    for (let artist of artists) {
+      if (artist.name === name) {
+        return artist;
+      }
     }
+  }
+
+  static editArtist(evt) {
+    evt.preventDefault();
+    if (!editing) {
+      editing = true;
+      const artist = Artist.getArtist(this.innerText);
+      const name = artist.name;
+      $(this).append($('<form>').html(
+        ` <input id="name" type="text" value="${name}">
+          <button> Submit </button>`
+      )
+      );
+      $(this).on("click", "button", function () {
+        let newName = $($(this).parent()[0][0]).val();
+        artist.name = newName;
+        const $li = $(this).parent().parent()
+        $(this).parent().remove();
+        $li.empty().html(newName);
+        editing = false;
+      });
+    }
+  }
+
+  //displays the Artist Name in the DOM
+  displayArtist() {
+    $artistList.append(
+      $('<li>').html(this.name)
+    );
   }
 
   //TODO: Clean this shit up
@@ -237,7 +266,7 @@ class Artist {
     const firstLetterDiv = this.letterDivs[0];
     const lastLetterDiv = this.letterDivs[this.letterDivs.length - 1];
     let bottom = getMinPixels(this.letterDivs.map(div => div.style['bottom']));
-    let left = firstLetterDiv.style['left'];
+    let left = getMinPixels(this.letterDivs.map(div => div.style['left']));
     let width = parseFloat(lastLetterDiv.style['left']) +
       parseFloat(lastLetterDiv.style['width']) -
       parseFloat(left);
@@ -282,22 +311,22 @@ class Artist {
       return;
     }
 
-    return new Artist(name.trim(), "coachella", letters);
+    return new Artist(name.trim(), letters);
   }
 }
 
-
+$artistList.on("click", "li", Artist.editArtist);
 
 
 $(document).keydown(function (e) {
   // check if the pressed key is the spacebar
-  if (e.keyCode == 32) {
+  if (e.keyCode == 18) {
     // do something
-    console.log('Spacebar pressed!');
+    console.log('Left Alt!');
     let artist = Artist.generateArtistFromWords();
     words = [];
     if (artist) {
-      //artist.displayArtistName();
+      artist.displayArtist();
       artist.displayBoundingBox();
       artists.push(artist);
     }
@@ -329,12 +358,4 @@ function getMinPixels(strs) {
   return mpx;
 }
 
-/*combine letterDivs into one div that has largest bounds
-*/
-function combineDivs() {
 
-}
-//then add eventlisteners to all completed divs
-/*
-  completed div looks like <div class="artist-div">"artists name"<div>
-*/
