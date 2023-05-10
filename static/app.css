@@ -31,3 +31,19 @@
   z-index: 1;
 }
 
+.content {
+  position: absolute;
+  padding: 0px;
+  font-size: 5px;
+  border: 1px solid black;
+  z-index: 3;
+}
+
+.artistDiv {
+  position: absolute;
+  padding: 0px;
+  font-size: 5px;
+  border: 1px solid rgb(11, 120, 28);
+  z-index: 3;
+}
+

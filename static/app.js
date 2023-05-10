@@ -54,7 +54,7 @@ function displayImage(file) {
  * }
  * @param {file} file image file
  */
-async function updloadImage(file) {
+async function uploadImage(file) {
 
   let formData = new FormData();
   formData.append("file", file);
@@ -116,7 +116,7 @@ async function submitImage(evt) {
   if (validImageTypes.includes(fileType)) {
 
     displayImage(file);
-    let response = await updloadImage(file);
+    let response = await uploadImage(file);
     console.log(response.data);
     displayBoxes(response.data);
     allowDrawing();
@@ -165,6 +165,22 @@ function allowDrawing() {
       height: `${height}px`
     });
 
+    if (editing) {
+      currArtistEdit.fullDivData.remove();
+      let offset = $imageWrapper.offset();
+      const newTop = parseFloat($rectangle.css("top")) - offset["top"];
+      const newLeft = parseFloat($rectangle.css("left")) - offset["left"];
+      currArtistEdit.fullDivData = $rectangle.clone()
+        .attr("class", "artistDiv")
+        .attr("id", null)
+        .css("position", "absolute")
+        .css("top", `${newTop}px`)
+        .css("left", `${newLeft}px`);
+
+      $imageWrapper.append(currArtistEdit.fullDivData);
+      return;
+    }
+
     const rect = $rectangle[0].getBoundingClientRect();
     const left = rect.left;
     const top = rect.top;
@@ -193,7 +209,7 @@ function allowDrawing() {
 }
 
 let words = [];
-let editing = false;
+
 
 /**
  * Add div to array of words
@@ -201,7 +217,7 @@ let editing = false;
  */
 function addWord($rectangle) {
   let $wordDiv = $rectangle.clone()
-    .attr("class", "artistDiv")
+    .attr("class", "wordDiv")
     .css("position", "absolute")
     .attr('id', null);
 
@@ -211,6 +227,8 @@ function addWord($rectangle) {
 
 // filled with list of artists found on page
 let artists = [];
+let editing = false;
+let currArtistEdit;
 
 /**
  * Class for individual Artist
@@ -235,26 +253,64 @@ class Artist {
     evt.preventDefault();
     if (!editing) {
       editing = true;
-      const artist = Artist.getArtist(this.innerText);
-      const name = artist.name;
+      currArtistEdit = Artist.getArtist(this.innerText);
+      const name = currArtistEdit.name;
       $(this).append($('<form>').html(
         ` <input id="name" type="text" value="${name}">
-          <button> Submit </button>`
+          <button id="submit-btn"> Submit </button>
+          <button id="delete-btn"> Delete </button>`
       )
       );
-      $(this).on("click", "button", function () {
+      $(this).on("click", "#submit-btn", function () {
         let newName = $($(this).parent()[0][0]).val();
-        artist.name = newName;
-        const $li = $(this).parent().parent()
+        currArtistEdit.name = newName;
+
+        const $li = $(this).parent().parent();
         $(this).parent().remove();
         $li.empty().html(newName);
+
         editing = false;
+        setTimeout(() => {
+          currArtistEdit = null;;
+        }, 10);
       });
+
+      $(this).on("click", "#delete-btn", function () {
+        currArtistEdit.removeArtist();
+
+        const $li = $(this).parent().parent();
+        $(this).parent().remove();
+        $li.remove();
+
+        editing = false;
+        setTimeout(() => {
+          currArtistEdit = null;;
+        }, 10);
+      });
+
     }
+  }
+
+  removeArtist() {
+    for (let div of this.letterDivs) {
+      $imageWrapper.append(div);
+    }
+    allowDrawing();
+    this.fullDivData.remove();
+    let idx = artists.indexOf(this);
+    artists.splice(idx, 1);
   }
 
   //displays the Artist Name in the DOM
   displayArtist() {
+    function getPosition($div) {
+      var offset = div.offset();
+
+      var top = offset.top;
+      var left = offset.left;
+
+      return { top: top, left: left };
+    }
     $artistList.append(
       $('<li>').html(this.name)
     );
@@ -274,7 +330,7 @@ class Artist {
     let height = highestPoint - parseFloat(bottom);
 
     let $fullArtistDiv = $('<div>')
-      .attr("class", "content")
+      .attr("class", "artistDiv")
       .css("bottom", `${bottom}`)
       .css("left", `${left}`)
       .css('height', `${height}px`)
@@ -285,33 +341,40 @@ class Artist {
     this.fullDivData = $fullArtistDiv;
   }
 
+
   /**
    * Generates an instance of the Artist object from the global list of words
    * @returns {Artist}
    */
   static generateArtistFromWords() {
-    let name = "";
-    let letters = [];
+    let wordArr = [];
+    let nameArr = [];
+    let letterDivs = [];
+
     for (let $wordDiv of words) {
 
       if (!$wordDiv.children().length) {
         continue;
       }
 
-      name = name + " ";
 
       for (let $letterDiv of $wordDiv.children()) {
-        name = name + $letterDiv["innerText"];
-        letters.push($letterDiv);
+        wordArr.push($letterDiv["innerText"]);
+        letterDivs.push($letterDiv);
       }
+
+      nameArr.push(wordArr.join(""));
+      wordArr = [];
     }
 
-    if (!name || name === " ") {
+    let nameString = nameArr.join(" ");
+
+    if (!nameString || nameString === " ") {
       alert("No Artist Created");
       return;
     }
 
-    return new Artist(name.trim(), letters);
+    return new Artist(nameString, letterDivs);
   }
 }
 
@@ -356,6 +419,15 @@ function getMinPixels(strs) {
     }
   }
   return mpx;
+}
+
+function getPosition($div) {
+  var offset = $div.offset();
+
+  var top = offset.top;
+  var left = offset.left;
+
+  return { top: top, left: left };
 }
 
 
