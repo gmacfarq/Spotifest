@@ -37,3 +37,8 @@ def send_boxes():
     #file.save(f'static/images/{filename}')
 
     return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim})
+
+@app.get('/auth')
+def get_token():
+    """request to spotify API to get new auth token"""
+    return

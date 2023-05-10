@@ -1,6 +1,8 @@
 "use strict";
 
 const IMAGE_ENDPOINT = '/image';
+const SPOTIFY_API_BASE = "https://api.spotify.com/v1/";
+const SPOTIFY_AUTH_TOKEN = 'BQC2ZmeZp6xmpEvJciUJknnroScCDLN3McyIyaYqbq5u9oVWyg5Sry1JV73-Vn25pD4gzRguMo2FzkKbPXorHENPDWKbWCR280DTzUgmdUPL5PDuefnq';
 const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 
 const $submitBtn = $('#submit-btn');
@@ -238,6 +240,7 @@ class Artist {
     this.name = name;//name of artist
     this.letterDivs = letterDivs; //all content letterDivs
     this.fullDivData = null;
+    this.li = null;
   }
 
   //get artist instance
@@ -249,6 +252,7 @@ class Artist {
     }
   }
 
+  //TODO: make use of new artist.li instead of .parent()
   static editArtist(evt) {
     evt.preventDefault();
     if (!editing) {
@@ -264,8 +268,8 @@ class Artist {
       $(this).on("click", "#submit-btn", function () {
         let newName = $($(this).parent()[0][0]).val();
         currArtistEdit.name = newName;
+        const $li = currArtistEdit.li;
 
-        const $li = $(this).parent().parent();
         $(this).parent().remove();
         $li.empty().html(newName);
 
@@ -278,7 +282,7 @@ class Artist {
       $(this).on("click", "#delete-btn", function () {
         currArtistEdit.removeArtist();
 
-        const $li = $(this).parent().parent();
+        const $li = currArtistEdit.li;
         $(this).parent().remove();
         $li.remove();
 
@@ -297,23 +301,19 @@ class Artist {
     }
     allowDrawing();
     this.fullDivData.remove();
+    this.li.remove
     let idx = artists.indexOf(this);
     artists.splice(idx, 1);
   }
 
   //displays the Artist Name in the DOM
   displayArtist() {
-    function getPosition($div) {
-      var offset = div.offset();
-
-      var top = offset.top;
-      var left = offset.left;
-
-      return { top: top, left: left };
-    }
+    let $artistLi = $('<li>').html(this.name)
     $artistList.append(
-      $('<li>').html(this.name)
+      $artistLi
     );
+
+    this.li = $artistLi
   }
 
   //TODO: Clean this shit up
@@ -429,5 +429,29 @@ function getPosition($div) {
 
   return { top: top, left: left };
 }
+
+async function testArtists(artists) {
+  let promises = [];
+  for (let artist of artists) {
+    promises.push(getSpotifyArtist(artist))
+  };
+
+  return Promise.allSettled(promises);
+}
+
+function getSpotifyArtist(artist){
+  return axios.get(`${SPOTIFY_API_BASE}search`,
+      {
+        params: {
+          'query': `artist:${artist.name}`,
+          'type': 'artist',
+          'locale':'en-US,en;q=0.9'
+        },
+        headers: { "Authorization": `Bearer ${SPOTIFY_AUTH_TOKEN}` }
+      }
+    )
+}
+
+
 
 
