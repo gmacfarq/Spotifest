@@ -5,7 +5,7 @@ import numpy as np
 filename = "static/test.png"
 
 
-SPACE_CHARS = ['*', '-', '°', '»']
+SPACE_CHARS = ['*', '-', '°', '»', '~', ':', '«', '©', '_']
 
 def get_boxes(filestr):
     """Gets list of detected letters and their coordinates in the image (boxes)
@@ -16,17 +16,16 @@ def get_boxes(filestr):
     img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
     h, w, _ = img.shape
     data = pytesseract.image_to_data(img)
-    print("DATA", data)
-    text = get_text(data)
     boxes = clean_boxes(data)
     dim = [h,w]
-    for d in data.splitlines():
-        hold = d.split()[-1]
-        print(hold, hold == '-1', str(hold) in SPACE_CHARS)
 
-    print ("TEXT", text)
+    for b in boxes:
+        for i in b[-1]:
+            if i in SPACE_CHARS:
+                b[-1] = b[-1].replace(i, '')
+        print(b[-1])
+
     print ("BOXES", boxes)
-
 
     return boxes,dim
 
