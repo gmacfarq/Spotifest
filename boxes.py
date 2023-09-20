@@ -5,7 +5,7 @@ import numpy as np
 filename = "static/test.png"
 
 
-ALLOWED_CHARS = ['.', '\'', '&']
+SPACE_CHARS = ['*', '-', '°', '»']
 
 def get_boxes(filestr):
     """Gets list of detected letters and their coordinates in the image (boxes)
@@ -15,18 +15,33 @@ def get_boxes(filestr):
     file_bytes = np.fromstring(filestr, np.uint8)
     img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
     h, w, _ = img.shape
-
-    boxes = clean_boxes(pytesseract.image_to_boxes(img))
+    data = pytesseract.image_to_data(img)
+    print("DATA", data)
+    text = get_text(data)
+    boxes = clean_boxes(data)
     dim = [h,w]
+    for d in data.splitlines():
+        hold = d.split()[-1]
+        print(hold, hold == '-1', str(hold) in SPACE_CHARS)
+
+    print ("TEXT", text)
+    print ("BOXES", boxes)
+
 
     return boxes,dim
 
-def clean_boxes(boxes):
+def clean_boxes(data):
     """
     Removes all non ALLOWED_CHARACTERS and non letters from list of detected letters
     """
+    return [b.split()[6:] for b in data.splitlines() if b.split()[-1] != '-1' and not str(b.split()[-1]) in SPACE_CHARS]
 
-    return [b.split()[:-1] for b in boxes.splitlines() if b[0].isalnum() or b[0] in ALLOWED_CHARS]
+
+def get_text(data):
+    """
+    Returns the text detected by tesseract
+    """
+    return [b.split()[-1] for b in data.splitlines()]
 
 
 #KEEPING THIS JUST IN CASE FOR NOW
