@@ -90,12 +90,12 @@ function displayBoxes(box_data) {
 
     $imageWrapper.append(
       $('<div>').html(
-        box[0]
+        box[5]
       ).attr("class", "content")
-        .css("bottom", `${box[2] * ratio}px`)
-        .css("left", `${box[1] * ratio}px`)
-        .css('height', `${(box[4] - box[2]) * (ratio)}px`)
-        .css('width', `${(box[3] - box[1]) * (ratio)}px`)
+        .css("bottom", `${height - box[3] * ratio - box[1] * ratio}px`)
+        .css("left", `${box[0] * ratio}px`)
+        .css('height', `${box[3] * ratio}px`)
+        .css('width', `${box[2] * ratio}px`)
     ).css('height', height).css('width', width);
   }
 }
