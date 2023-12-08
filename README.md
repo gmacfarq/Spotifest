@@ -8,3 +8,8 @@ Festival poster reader and application to add festival artists to Spotify playli
 - Node Express server with Passport
 - Database setup
 - Amazon AWS - S3 image storage
+
+## Demo Protocol
+- clone this repo
+- install dependencies (pip install requirements.txt)
+- 

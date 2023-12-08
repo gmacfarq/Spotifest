@@ -24,9 +24,7 @@ def get_boxes(filestr):
         for i in b[-1]:
             if i in SPACE_CHARS:
                 b[-1] = b[-1].replace(i, '')
-        print(b[-1])
 
-    print ("BOXES", boxes)
 
 
     return boxes,dim

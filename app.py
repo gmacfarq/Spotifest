@@ -3,6 +3,7 @@ import os
 
 from flask import Flask, request, request, jsonify, render_template
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_cors import CORS
 from models import connect_db, db
 from boxes import get_boxes
 
@@ -14,6 +15,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 
 app.config["SECRET_KEY"] = "a-very-big-secret"
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}})
 
 connect_db(app)
 
@@ -34,11 +37,7 @@ def send_boxes():
 
     #filename = str(request.files["file"]).split()[1][1:-1]
     boxes, dim = get_boxes(file)
+    print(boxes)
     #file.save(f'static/images/{filename}')
 
     return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim})
-
-@app.get('/auth')
-def get_token():
-    """request to spotify API to get new auth token"""
-    return
