@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
 from models import connect_db, db
 from boxes import get_boxes
+from openAIinterface import artists_from_image
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -27,17 +28,20 @@ def home():
     return render_template('base.html')
 
 @app.post('/image')
-def send_boxes():
+async def send_boxes():
     """
         accepts multipart/form data image in request
         sends list of boxes and image dimensions in response
     """
 
     file = request.files['file'].read()
+    artists_string = await artists_from_image(file)
+    print(artists_string)
+
 
     #filename = str(request.files["file"]).split()[1][1:-1]
     boxes, dim = get_boxes(file)
     print(boxes)
     #file.save(f'static/images/{filename}')
 
-    return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim})
+    return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim, 'artists': artists_string})
