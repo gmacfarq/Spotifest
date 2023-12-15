@@ -5,7 +5,7 @@ def combineBoxes(boxes):
     and return a new box like
         ['least_left', 'least_top', 'total_width', 'total_height']
     '''
-    
+
     combine = boxes[:-1]
     text = boxes[-1]
 
@@ -48,6 +48,36 @@ def parseArtists(string):
     artists = [artist.split() for artist in artists]
     return artists
 
+import unicodedata
+import string
+
+def normalize_string(s):
+    """
+    Normalize string by removing accents, converting to lowercase, and removing punctuation.
+    """
+
+    # Remove accents
+    no_accents = ''.join(
+        c for c in unicodedata.normalize('NFD', s)
+        if unicodedata.category(c) != 'Mn'
+    )
+
+    # Remove punctuation
+    no_punctuation = ''.join(
+        c for c in no_accents
+        if c not in string.punctuation
+    )
+
+    return no_punctuation.lower()
+
+def compare_insensitive(str1, str2):
+    """
+    Compare two strings in a case-insensitive manner, also ignoring accents.
+    """
+    normalized_str1 = normalize_string(str1)
+    normalized_str2 = normalize_string(str2)
+    return normalized_str1 == normalized_str2
+
 def findArtistBoxes(boxes, artist):
     '''
     Takes in list of boxes and one artist and returns the
@@ -57,10 +87,10 @@ def findArtistBoxes(boxes, artist):
     artist_boxes = []
     first_name = artist[0]
     for k in range(len(boxes)):
-        if boxes[k][-1] == first_name:
+        if compare_insensitive(boxes[k][-1], first_name):
             artist_boxes.append(boxes[k])
             for i in range(1, len(artist)):
-                if boxes[k+i][-1] == artist[i]:
+                if compare_insensitive(boxes[k+i][-1], artist[i]):
                     artist_boxes.append(boxes[k+i])
                 else:
                     artist_boxes = []
