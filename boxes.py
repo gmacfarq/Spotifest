@@ -16,7 +16,6 @@ def get_boxes(filestr):
     img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
     h, w, _ = img.shape
     data = pytesseract.image_to_data(img)
-    print ("DATA", data)
     boxes = clean_boxes(data)
     dim = [h,w]
 

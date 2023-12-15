@@ -7,6 +7,7 @@ from flask_cors import CORS
 from models import connect_db, db
 from boxes import get_boxes
 from openAIinterface import artists_from_image
+from processArtists import makeArtistBoxes, findArtistBoxes
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -35,13 +36,19 @@ async def send_boxes():
     """
 
     file = request.files['file'].read()
-    artists_string = await artists_from_image(file)
+    artists = await artists_from_image(file)
+    artists_string = artists["content"]
+
     print(artists_string)
+
+
 
 
     #filename = str(request.files["file"]).split()[1][1:-1]
     boxes, dim = get_boxes(file)
     print(boxes)
     #file.save(f'static/images/{filename}')
+    newboxes = makeArtistBoxes(boxes, artists_string)
+    print(newboxes)
 
-    return jsonify({'msg': 'success', 'boxes': boxes, 'dim':dim, 'artists': artists_string})
+    return jsonify({'msg': 'success', 'boxes': newboxes, 'dim':dim})
