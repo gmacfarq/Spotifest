@@ -39,16 +39,16 @@ async def send_boxes():
     artists = await artists_from_image(file)
     artists_string = artists["content"]
 
-    print(artists_string)
+
 
 
 
 
     #filename = str(request.files["file"]).split()[1][1:-1]
     boxes, dim = get_boxes(file)
-    print(boxes)
+
     #file.save(f'static/images/{filename}')
     newboxes = makeArtistBoxes(boxes, artists_string)
-    print(newboxes)
+    
 
     return jsonify({'msg': 'success', 'boxes': newboxes, 'dim':dim})

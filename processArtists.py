@@ -49,7 +49,7 @@ def parseArtists(string):
     return artists
 
 import unicodedata
-import string
+import re
 
 def normalize_string(s):
     """
@@ -62,11 +62,8 @@ def normalize_string(s):
         if unicodedata.category(c) != 'Mn'
     )
 
-    # Remove punctuation
-    no_punctuation = ''.join(
-        c for c in no_accents
-        if c not in string.punctuation
-    )
+    # Remove all non-alphanumeric characters (including all punctuation)
+    no_punctuation = re.sub(r'\W+', '', no_accents)
 
     return no_punctuation.lower()
 
