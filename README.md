@@ -1,15 +1,8 @@
-# Spotifest
-Festival poster reader and application to add festival artists to Spotify playlists
+# Festy (Flask API)
+Festival poster reader utilizing OpenAI vision-4 and OpenCV
 ## Finished
-- Backend Python application to identify letters
-- Dev frontend JS to select artists and query Spotify API
+- Backend connection to OpenAI and use of OpenCV text detection to find and outline artists in an uploaded image
 ## In Development
-- React based Application for client
-- Node Express server with Passport
-- Database setup
-- Amazon AWS - S3 image storage
+- further ways to accurately discover artist names in an image
+- testing
 
-## Demo Protocol
-- clone this repo
-- install dependencies (pip install requirements.txt)
-- 
