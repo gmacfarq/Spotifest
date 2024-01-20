@@ -9,10 +9,11 @@ from boxes import get_boxes
 from openAIinterface import artists_from_image
 from getSpotifyToken import get_token
 from processArtists import makeArtistBoxes, findArtistBoxes
+from models import Artist, Festival, Act, connect_db, db
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "postgresql:///blogly"
+    "DATABASE_URL", "postgresql:///festy"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
@@ -64,3 +65,33 @@ async def send_token():
     return jsonify(get_token())
 
 
+@app.post('/festival')
+def add_festival():
+    """
+        accepts festival and artist data in request
+        adds festival and artist data to database
+        returns success message
+    """
+
+    data = request.json
+    print(data)
+
+    festival = Festival(name=data['name'], date=data['date'])
+    db.session.add(festival)
+    db.session.commit()
+
+    for artist in data['artists']:
+        existing_artist = Artist.query.filter_by(spotify_id=artist['spotifyid']).first()
+        if existing_artist:
+            act = Act(artist_id=existing_artist.id, event_id=festival.id)
+            db.session.add(act)
+            db.session.commit()
+        else:
+            new_artist = Artist(name=artist['name'], spotify_id=artist['spotifyid'], popularity=artist['popularity'])
+            db.session.add(new_artist)
+            db.session.commit()
+            act = Act(artist_id=new_artist.id, event_id=festival.id)
+            db.session.add(act)
+            db.session.commit()
+
+    return jsonify({'msg': 'success'})

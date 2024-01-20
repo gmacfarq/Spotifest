@@ -266,8 +266,10 @@ class Artist {
 
   //get artist instance
   static getArtist(name) {
+    // Sanitize input by removing trailing numbers, "confirm" text, and anything after "confirm"
+    const sanitizedName = name.replace(/\d+confirm.*$/, '').replace(/No Artist Found$/, '').trim();
     for (let artist of artists) {
-      if (artist.name === name) {
+      if (artist.name === sanitizedName) {
         return artist;
       }
     }
@@ -481,27 +483,63 @@ function getPosition($div) {
   return { top: top, left: left };
 }
 
-async function testArtists(artists) {
-  for (let artist of artists) {
-    let artistData = await getSpotifyArtist(artist);
+async function testArtist(artist){
+  let artistData = await getSpotifyArtist(artist);
     if(!artistData.data.artists.items.length){
       artist.li.append($('<p>').html("No Artist Found"));
-      continue;
+      return;
     }
     artist.spotifyid = artistData.data.artists.items[0].id;
-
-    artist.image = artistData.data.artists.items[0].images[0].url;
+    artist.popularity = artistData.data.artists.items[0].popularity;
+    artist.image = artistData.data.artists.items[0].images[0]?.url;
 
     artist.li.append($('<img>')
       .attr('src', artist.image)
       .attr('height', 'auto')
       .attr('width', '100px')
     );
-    artist.li.append($('<span>').html(artistData.data.artists.items[0].popularity));
+    artist.li.append($('<span>').html(` ${artistData.data.artists.items[0].popularity}`));
     artist.li.append($('<button>').html("confirm").on("click", function () {
-      confirmedArtists.push(artist);
+      confirmedArtists.push({
+        spotifyid: artist.spotifyid,
+        name: artistData.data.artists.items[0].name,
+        popularity: artist.popularity
+      });
+      editing = false;
+      artist.removeArtist();
     }));
-    artist.popularity = artistData.data.artists.items[0].popularity;
+    artist.li.append($('<button>').html("expand").on("click", function () {
+      let startIndex = artistData.data.artists.items.indexOf(artist) + 1;
+      let endIndex = startIndex + 10;
+      let nextArtists = artistData.data.artists.items.slice(startIndex, endIndex);
+
+      for (let nextArtist of nextArtists) {
+        let nextArtistImage = nextArtist.images[0]?.url;
+        let $nextArtistImage = $('<img>')
+          .attr('src', nextArtistImage)
+          .attr('height', 'auto')
+          .attr('width', '100px');
+
+        $nextArtistImage.on("click", function () {
+          confirmedArtists.push({
+            spotifyid: nextArtist.id,
+            name: nextArtist.name,
+            popularity: nextArtist.popularity
+          });
+          editing =false;
+          artist.removeArtist();
+        });
+
+        artist.li.append($nextArtistImage);
+      }
+    }));
+
+
+}
+
+async function testArtists(artists) {
+  for (let artist of artists) {
+    testArtist(artist);
   };
 }
 
@@ -539,5 +577,17 @@ async function getSpotifyToken(){
 
 //   return artistData;
 // }
+
+async function sendFestivalToServer() {
+  let festival = {
+    "name": $('#festival-name').val(),
+    "date": $('#festival-date').val(),
+    "artists": confirmedArtists
+    // "location": $('#festival-location').val()
+  };
+
+  let response = await axios.post('/festival', festival);
+  console.log(response.data);
+}
 
 
