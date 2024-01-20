@@ -1,50 +1,74 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Axios File upload</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-    />
-    <link rel="stylesheet" href="../static/app.css">
-  </head>
-  <body>
 
-    <div class="container" style="max-width: 600px">
-      <h3 class="mb-3">Axios File Upload</h3>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axios File upload</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="../static/app.css">
+</head>
 
-      <div class="input-group">
-        <div class="custom-file">
-          <input id="input-file" type="file" class="custom-file-input" />
-          <label id="input-file-label" class="custom-file-label" for="input-file">Choose file</label>
-        </div>
-        <div class="input-group-append">
-          <button
-            class="btn btn-outline-success" id="submit-btn"
-            type="button">
-            Upload
-          </button>
-        </div>
+<body>
+
+  <!-- <div class="container" style="max-width: 600px">
+    <h3 class="mb-3">Axios File Upload</h3>
+
+    <div class="input-group">
+      <div class="custom-file">
+        <input id="input-file" type="file" class="custom-file-input" />
+        <label id="input-file-label" class="custom-file-label" for="input-file">Choose file</label>
       </div>
-      <div id="image-wrapper" style="position: relative; z-index: 2;">
-        <div id="canvas"></div>
-        <div id="rectangle" style="position: fixed; z-index: 5;"></div>
+      <div class="input-group-append">
+        <button class="btn btn-outline-success" id="submit-btn" type="button">
+          Upload
+        </button>
       </div>
-      <!-- <button id="back">Back</button> -->
-
-
     </div>
-    <div>
-      <ul id = "artist-list">
+  </div> -->
+
+  <div id="big-wrap">
+
+    <div id="image-wrapper" style="z-index: 2;">
+      <div id="canvas"></div>
+      <div id="rectangle" style="position: fixed; z-index: 5;"></div>
+    </div>
+
+    <div id="form-wrapper">
+      <div class="container" style="max-width: 600px">
+        <h3 class="mb-3">Axios File Upload</h3>
+
+        <div class="input-group">
+          <div class="custom-file">
+            <input id="input-file" type="file" class="custom-file-input" />
+            <label id="input-file-label" class="custom-file-label" for="input-file">Choose file</label>
+          </div>
+          <div class="input-group-append">
+            <button class="btn btn-outline-success" id="submit-btn" type="button">
+              Upload
+            </button>
+          </div>
+        </div>
+      </div>
+      <form>
+        <input type="text" id="festival name" name="festival-name" placeholder="Festival Name">
+        <br>
+        <input type="date" id="festival date" name="festival-date" placeholder="Festival Date">
+      </form>
+      <button id="test-artists">Test Artists</button>
+      <form id="add-artist">
+        <input type="text" id="artist-name" name="artist-name" placeholder="Artist Name">
+      </form>
+      <button id="add-artist-btn" type="submit" value="Submit"> Submit </button>
+      <ul id="artist-list">
         <!--Artist names appended to list here-->
       </ul>
-      
     </div>
-      <script src="https://unpkg.com/jquery"></script>
-      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-      <script src="../static/app.js"></script>
-  </body>
+  </div>
+  <script src="https://unpkg.com/jquery"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="../static/app.js"></script>
+</body>
+
 </html>

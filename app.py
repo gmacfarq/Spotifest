@@ -7,6 +7,7 @@ from flask_cors import CORS
 from models import connect_db, db
 from boxes import get_boxes
 from openAIinterface import artists_from_image
+from getSpotifyToken import get_token
 from processArtists import makeArtistBoxes, findArtistBoxes
 
 app = Flask(__name__)
@@ -18,7 +19,7 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 app.config["SECRET_KEY"] = "a-very-big-secret"
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}})
+CORS(app, resources={r"/*": {"origins": "http://localhost:5500"}})
 
 connect_db(app)
 
@@ -49,6 +50,17 @@ async def send_boxes():
 
     #file.save(f'static/images/{filename}')
     newboxes = makeArtistBoxes(boxes, artists_string)
-    
+
+    # print(newboxes)
 
     return jsonify({'msg': 'success', 'boxes': newboxes, 'dim':dim})
+
+@app.get('/spotifyauth')
+async def send_token():
+    """
+        accepts code in request
+        sends access token in response
+    """
+    return jsonify(get_token())
+
+

@@ -5,6 +5,9 @@ def combineBoxes(boxes):
     and return a new box like
         ['least_left', 'least_top', 'total_width', 'total_height']
     '''
+    
+    if len(boxes) == 2:
+        return [boxes[0][0], boxes[0][1], boxes[0][2], boxes[0][3], boxes[-1]]
 
     combine = boxes[:-1]
     text = boxes[-1]
@@ -81,9 +84,14 @@ def findArtistBoxes(boxes, artist):
     boxes that correspond to that artist
     '''
     full_name = " ".join(artist)
+    nospace_name = "".join(artist)
     artist_boxes = []
     first_name = artist[0]
     for k in range(len(boxes)):
+        if compare_insensitive(boxes[k][-1], nospace_name):
+            artist_boxes.append(boxes[k])
+            artist_boxes.append(full_name)
+            return artist_boxes
         if compare_insensitive(boxes[k][-1], first_name):
             artist_boxes.append(boxes[k])
             for i in range(1, len(artist)):

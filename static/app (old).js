@@ -2,6 +2,7 @@
 
 const IMAGE_ENDPOINT = '/image';
 const SPOTIFY_API_BASE = "https://api.spotify.com/v1/";
+const SPOTIFY_AUTH_TOKEN = 'BQC2ZmeZp6xmpEvJciUJknnroScCDLN3McyIyaYqbq5u9oVWyg5Sry1JV73-Vn25pD4gzRguMo2FzkKbPXorHENPDWKbWCR280DTzUgmdUPL5PDuefnq';
 const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
 
 const $submitBtn = $('#submit-btn');
@@ -9,7 +10,6 @@ const $fileInput = $('#input-file');
 const $inputFileLabel = $('#input-file-label');
 const $imageWrapper = $('#image-wrapper');
 const $artistList = $('#artist-list');
-const $addArtistBtn = $('#add-artist-btn');
 
 
 
@@ -122,7 +122,7 @@ async function submitImage(evt) {
     console.log(response.data);
     displayBoxes(response.data);
     addArtists(response.data);
-    displayArtists();
+    response = response.data;
     allowDrawing();
 
 
@@ -144,7 +144,7 @@ function addArtists(data) {
   artistNames = [...new Set(artistNames)];
 
   for (let name of artistNames) {
-    artists.push(new Artist(name));
+    artists.push(new Artist(name, []));
   }
 }
 
@@ -256,11 +256,10 @@ let currArtistEdit;
  * Class for individual Artist
  */
 class Artist {
-  constructor(name) {
+  constructor(name, letterDivs) {
     this.name = name;//name of artist
-    this.spotifyid = null;
-    this.image = null;
-    this.popularity = null;
+    this.letterDivs = letterDivs; //all content letterDivs
+    this.fullDivData = null;
     this.li = null;
   }
 
@@ -317,19 +316,24 @@ class Artist {
   }
 
   removeArtist() {
-    this.li.remove;
+    for (let div of this.letterDivs) {
+      $imageWrapper.append(div);
+    }
+    allowDrawing();
+    this.fullDivData.remove();
+    this.li.remove
     let idx = artists.indexOf(this);
     artists.splice(idx, 1);
   }
 
   //displays the Artist Name in the DOM
   displayArtist() {
-    let $artistLi = $('<li>').html(this.name);
+    let $artistLi = $('<li>').html(this.name)
     $artistList.append(
       $artistLi
     );
 
-    this.li = $artistLi;
+    this.li = $artistLi
   }
 
   //TODO: Clean this shit up
@@ -394,41 +398,6 @@ class Artist {
   }
 }
 
-//displays all Artists in the DOM
-function displayArtists() {
-  for (let artist of artists) {
-    let $artistLi = $('<li>').html(artist.name);
-    $artistList.append(
-      $artistLi
-    );
-
-    artist.li = $artistLi;
-  }
-}
-
-/*
-  takes form input at the bootom of the page
-  and adds it to the list of artists when hitting submit
-*/
-function addNewArtist() {
-  let artistName = $('#artist-name').val();
-  if (artistName === "") {
-    return;
-  }
-  let artist = new Artist(artistName);
-
-  let $artistLi = $('<li>').html(artist.name);
-  $artistList.prepend(
-    $artistLi
-  );
-
-  artist.li = $artistLi;
-  artists.push(artist);
-
-  $('#artist-name').val("");
-}
-$addArtistBtn.on("click", addNewArtist);
-
 $artistList.on("click", "li", Artist.editArtist);
 
 
@@ -482,62 +451,27 @@ function getPosition($div) {
 }
 
 async function testArtists(artists) {
+  let promises = [];
   for (let artist of artists) {
-    let artistData = await getSpotifyArtist(artist);
-    if(!artistData.data.artists.items.length){
-      artist.li.append($('<p>').html("No Artist Found"));
-      continue;
-    }
-    artist.spotifyid = artistData.data.artists.items[0].id;
-
-    artist.image = artistData.data.artists.items[0].images[0].url;
-
-    artist.li.append($('<img>')
-      .attr('src', artist.image)
-      .attr('height', 'auto')
-      .attr('width', '100px')
-    );
-    artist.li.append($('<span>').html(artistData.data.artists.items[0].popularity));
-    artist.li.append($('<button>').html("confirm").on("click", function () {
-      confirmedArtists.push(artist);
-    }));
-    artist.popularity = artistData.data.artists.items[0].popularity;
+    promises.push(getSpotifyArtist(artist))
   };
+
+  return Promise.allSettled(promises);
 }
 
-async function getSpotifyArtist(artist) {
+function getSpotifyArtist(artist){
   return axios.get(`${SPOTIFY_API_BASE}search`,
-    {
-      params: {
-        'query': `artist:${artist.name}`,
-        'type': 'artist',
-        'locale': 'en-US,en;q=0.9'
-      },
-      headers: { "Authorization": `Bearer ${await getSpotifyToken()}` }
-    }
-  );
+      {
+        params: {
+          'query': `artist:${artist.name}`,
+          'type': 'artist',
+          'locale':'en-US,en;q=0.9'
+        },
+        headers: { "Authorization": `Bearer ${SPOTIFY_AUTH_TOKEN}` }
+      }
+    )
 }
 
 
-
-let confirmedArtists = [];
-
-async function getSpotifyToken(){
-  const response = await axios.get('/spotifyauth');
-  return response.data;
-}
-
-
-// async function getSpotifyArtists() {
-//   let response = await testArtists(artists);
-//   let artistData = [];
-//   for (let resp of response) {
-//     if (resp.status === "fulfilled") {
-//       artistData.push(resp.value.data.artists.items[0]);
-//     }
-//   }
-
-//   return artistData;
-// }
 
 
