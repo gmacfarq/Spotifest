@@ -507,6 +507,7 @@ async function testArtist(artist){
       });
       editing = false;
       artist.removeArtist();
+      $(this).parent().remove();
     }));
     artist.li.append($('<button>').html("expand").on("click", function () {
       let startIndex = artistData.data.artists.items.indexOf(artist) + 1;
