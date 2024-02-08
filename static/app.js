@@ -529,6 +529,7 @@ async function testArtist(artist){
           });
           editing =false;
           artist.removeArtist();
+          $(this).parent().remove();
         });
 
         artist.li.append($nextArtistImage);
@@ -583,6 +584,9 @@ async function sendFestivalToServer() {
   let festival = {
     "name": $('#festival-name').val(),
     "date": $('#festival-date').val(),
+    "location": $('#festival-location').val(),
+    "image": $('#festival-image').val(),
+    "website": $('#festival-website').val(),
     "artists": confirmedArtists
     // "location": $('#festival-location').val()
   };

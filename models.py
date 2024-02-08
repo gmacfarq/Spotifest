@@ -64,6 +64,16 @@ class Festival(db.Model):
         nullable=True
     )
 
+    website = db.Column(
+        db.String(180),
+        nullable=True
+    )
+
+    image = db.Column(
+        db.String(255),
+        nullable=True
+    )
+
 
 class Act(db.Model):
     """Class representing a performance of an artist at an event"""
