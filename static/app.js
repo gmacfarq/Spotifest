@@ -584,11 +584,10 @@ async function sendFestivalToServer() {
   let festival = {
     "name": $('#festival-name').val(),
     "date": $('#festival-date').val(),
-    "location": $('#festival-location').val(),
+    "zipcode": $('#festival-zipcode').val(),
     "image": $('#festival-image').val(),
     "website": $('#festival-website').val(),
     "artists": confirmedArtists
-    // "location": $('#festival-location').val()
   };
 
   let response = await axios.post('/festival', festival);

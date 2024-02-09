@@ -59,8 +59,13 @@ class Festival(db.Model):
         nullable=False
     )
 
-    location = db.Column(
+    zipcode = db.Column(
         db.Integer,
+        nullable=True
+    )
+
+    location = db.Column(
+        db.String(80),
         nullable=True
     )
 

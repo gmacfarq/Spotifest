@@ -6,6 +6,7 @@ from flask_cors import CORS
 from models import connect_db, db
 from boxes import get_boxes
 from openAIinterface import artists_from_image
+from zipcodeAPI import get_location
 from getSpotifyToken import get_token
 from processArtists import makeArtistBoxes
 from models import Artist, Festival, Act, connect_db, db
@@ -73,10 +74,13 @@ def add_festival():
     data = request.json
     print(data)
 
+    zipcode = data["zipcode"]
+
     festival = Festival(
         name=data["name"],
         date=data["date"],
-        location=data["location"],
+        location= get_location(zipcode),
+        zipcode=zipcode,
         website=data["website"],
         image=data["image"],
     )
