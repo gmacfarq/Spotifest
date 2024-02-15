@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime, timezone
 
 db = SQLAlchemy()
 
@@ -96,6 +97,101 @@ class Act(db.Model):
         db.ForeignKey('festivals.id'),
         primary_key=True
     )
+
+class User(db.Model):
+    """Class representing a user of the app"""
+
+    __tablename__ = "users"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    username = db.Column(
+        db.String(180),
+        nullable=False,
+    )
+
+    spotify_user_id = db.Column(
+        db.String(180),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.String(180),
+        nullable=False,
+        default=datetime.now(
+            timezone.utc
+        )
+    )
+
+class Playlist(db.Model):
+    """Class representing a playlist created by a user"""
+
+    __tablename__ = "playlists"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+
+    name = db.Column(
+        db.String(180),
+        nullable=False
+    )
+
+    playlist_spotify_id = db.Column(
+        db.String(180),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.String(180),
+        nullable=False,
+        default=datetime.now(
+            timezone.utc
+        )
+    )
+
+    user = db.relationship("User", backref="playlists")
+
+class Track(db.Model):
+    """Class representing a track"""
+
+    __tablename__ = "tracks"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    track_spotify_id = db.Column(
+        db.String(180),
+        nullable=False
+    )
+
+    artist_id = db.Column(
+        db.Integer,
+        db.ForeignKey('artists.id'),
+        nullable=False
+    )
+
+    date_added = db.Column(
+        db.String(180),
+        nullable=False,
+        default=datetime.now(
+            timezone.utc
+        )
+    )
+
+    artist = db.relationship("Artist", backref="tracks")
 
 def connect_db(app):
     """Connect this database to provided Flask app.
