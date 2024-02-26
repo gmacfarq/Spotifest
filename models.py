@@ -178,8 +178,8 @@ class Track(db.Model):
     )
 
     artist_id = db.Column(
-        db.Integer,
-        db.ForeignKey('artists.id'),
+        db.String(180),
+        db.ForeignKey('artists.spotify_id'),
         nullable=False
     )
 
