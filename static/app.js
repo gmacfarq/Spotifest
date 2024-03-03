@@ -559,6 +559,60 @@ async function getSpotifyArtist(artist) {
 }
 
 
+async function getArtistFromID(id) {
+  return axios.get(`${SPOTIFY_API_BASE}artists/${id}`,
+    {
+      headers: { "Authorization": `Bearer ${await getSpotifyToken()}` }
+    }
+  );
+}
+
+async function getArtistsFromIDs(ids) {
+  if(!ids.length){
+    return;
+  }
+  return await axios.get(`${SPOTIFY_API_BASE}artists`,
+    {
+      params: {
+        'ids': ids.join(","),
+      },
+      headers: { "Authorization": `Bearer ${await getSpotifyToken()}` }
+    }
+  );
+}
+
+async function artistsToConfirmedArtists(ids) {
+
+  if(!ids.length){
+    return;
+  }
+  if(ids.length>50){
+    let re = [];
+    for(let i = 0; i<ids.length; i+=50){
+      let response = await getArtistsFromIDs(ids.slice(i, i+50));
+      re.push(response.data.artists);
+    }
+    for (let r of re){
+      for (let artist of r){
+        confirmedArtists.push({
+          spotifyid: artist.id,
+          name: artist.name,
+          popularity: artist.popularity
+        });
+      }
+    }
+  }
+  else{
+    re = await getArtistsFromIDs(ids);
+    for (let artist of re.data.artists){
+      confirmedArtists.push({
+        spotifyid: artist.id,
+        name: artist.name,
+        popularity: artist.popularity
+      });
+    }
+  }
+}
 
 let confirmedArtists = [];
 
